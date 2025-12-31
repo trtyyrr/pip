@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"><title>Valae AI</title>
+    <style>
+        body { background: #111; color: #0f8; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        #chat { width: 100%; max-width: 500px; height: 400px; overflow-y: auto; background: #222; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #444; }
+        .input-area { display: flex; gap: 10px; width: 100%; max-width: 500px; }
+        input { flex: 1; padding: 12px; border-radius: 5px; border: none; background: #333; color: white; }
+        button { padding: 10px 20px; background: #0f8; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Valae AI 远程助手</h2>
+    <div id="chat"></div>
+    <div class="input-area">
+        <input type="text" id="msg" placeholder="输入你想问的..."><button onclick="send()">发送</button>
+    </div>
+    <script>
+        // 🔑 唯一的动手点：把你的 DeepSeek sk- 密钥填在下面引号里
+        const KEY = "sk-8e1b7cf7fc1a46df9c747d79c9985e41";
+
+        async function send() {
+            const i = document.getElementById('msg');
+            const c = document.getElementById('chat');
+            if(!i.value) return;
+            c.innerHTML += `<div style="margin:10px 0"><b>我:</b> ${i.value}</div>`;
+            const text = i.value; i.value = '';
+            try {
+                const r = await fetch('https://api.deepseek.com/chat/completions', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${KEY}`},
+                    body: JSON.stringify({model: "deepseek-chat", messages: [{role: "user", content: text}]})
+                });
+                const d = await r.json();
+                c.innerHTML += `<div style="color:#0f8; margin-bottom:10px"><b>AI:</b> ${d.choices[0].message.content}</div><hr style="border-color:#333">`;
+            } catch (e) { c.innerHTML += `<div style="color:red">错误：检查密钥是否填对或额度是否用完</div>`; }
+            c.scrollTop = c.scrollHeight;
+        }
+    </script>
+</body>
+</html>
